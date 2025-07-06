@@ -49,8 +49,8 @@ export default defineEventHandler(async (event) => {
       // Send initial progress
       sendProgress();
 
-      // Send progress updates every 500ms
-      const interval = setInterval(sendProgress, 500);
+      // Send progress updates every 250ms
+      const interval = setInterval(sendProgress, 250);
 
       // Cleanup on close
       const cleanup = () => {

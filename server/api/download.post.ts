@@ -26,8 +26,12 @@ export default defineEventHandler(async (event) => {
   const downloadId = `${crypto.randomUUID()}_${Date.now()}`;
 
   const downloadProcess = spawn('yt-dlp', [
+    '-o',
+    `${DOWNLOADS_DIR}/${downloadId}.webm`,
     '-f',
-    `best${quality !== 'best' ? `[height<=${quality}]` : ''}`,
+    `bestvideo${
+      quality !== 'best' ? `[height<=${quality}]` : ''
+    }[ext=webm]+bestaudio[ext=webm]/best[ext=webm]/best`,
     '--merge-output-format',
     'webm',
     '--progress',

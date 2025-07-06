@@ -43,6 +43,7 @@
             variant="outline"
             size="lg"
             class="gap-1"
+            :disabled="isLoading"
             @click="onDownloadClick('best')"
           >
             download
@@ -56,6 +57,7 @@
             :key="quality"
             color="neutral"
             variant="outline"
+            :disabled="isLoading"
             @click="onDownloadClick(quality)"
           >
             <span class="font-bold">{{ quality }}p</span>
@@ -63,12 +65,23 @@
         </UButtonGroup>
       </div>
     </div>
+
+    <div class="text-center mx-auto mt-8 w-xs">
+      <p v-if="showProgress">{{ downloadStatus }}</p>
+      <UProgress v-if="showProgress" v-model="downloadProgress" status color="secondary" />
+      <p v-if="downloadError" class="text-error">downloadError</p>
+
+      <UButton v-if="downloadStatus === 'completed'" size="xl" @click="downloadVideo">
+        get video
+        <PhVideo weight="bold" />
+      </UButton>
+    </div>
   </UContainer>
 </template>
 
 <script setup lang="ts">
 import type { FormSubmitEvent } from '@nuxt/ui';
-import { PhArrowRight, PhSparkle } from '@phosphor-icons/vue';
+import { PhArrowRight, PhSparkle, PhVideo } from '@phosphor-icons/vue';
 import * as z from 'zod/v4';
 import type { YouTubeVideoInfo } from '~/utils/get-video-info';
 
@@ -114,7 +127,8 @@ async function onSubmit(event: FormSubmitEvent<Schema>) {
 
 const qualities = [144, 240, 360, 480, 720, 1080];
 
-const { downloadProgress, downloadStatus, downloadError, startDownload } = useYoutubeDownload();
+const { downloadProgress, downloadStatus, downloadError, downloadUrl, startDownload } =
+  useYoutubeDownload();
 
 async function onDownloadClick(quality: 'best' | number) {
   if (!url.value) {
@@ -127,30 +141,21 @@ async function onDownloadClick(quality: 'best' | number) {
     return;
   }
 
+  isLoading.value = true;
   await startDownload(id, quality);
+  isLoading.value = false;
 }
 
-watch(
-  downloadProgress,
-  (progress) => {
-    console.log('progress', progress);
-  },
-  { immediate: true }
-);
+const showProgress = computed(() => !['idle', 'error', 'completed'].includes(downloadStatus.value));
 
-watch(
-  downloadStatus,
-  (status) => {
-    console.log('status', status);
-  },
-  { immediate: true }
-);
-
-watch(
-  downloadError,
-  (error) => {
-    console.log('error', error);
-  },
-  { immediate: true }
-);
+async function downloadVideo() {
+  if (downloadUrl.value) {
+    const link = document.createElement('a');
+    link.href = downloadUrl.value;
+    link.download = `yt-get_${videoInfo.value?.title}.webm`;
+    document.body.appendChild(link);
+    link.click();
+    document.body.removeChild(link);
+  }
+}
 </script>
