@@ -1,0 +1,156 @@
+<template>
+  <UContainer>
+    <div class="text-center">
+      <h1 class="text-2xl font-black mb-2">yt-get</h1>
+      <p class="mb-4">download YouTube videos as .webm files</p>
+
+      <UForm :schema="schema" :state="state" :validate-on="['change']" @submit="onSubmit">
+        <UFormField name="url">
+          <UInput
+            v-model="state.url"
+            :disabled="isLoading"
+            placeholder="paste a YouTube url"
+            size="xl"
+            class="md:w-md"
+          />
+          <UButton
+            type="submit"
+            size="xl"
+            :disabled="isGetDisabled"
+            class="ml-2 font-bold disabled:bg-neutral-400 dark:disabled:bg-neutral-600"
+          >
+            get
+            <PhArrowRight weight="bold" />
+          </UButton>
+        </UFormField>
+      </UForm>
+    </div>
+
+    <div v-if="videoInfo" class="grid md:grid-cols-2 gap-4 items-start mt-8">
+      <VideoPreview
+        :title="videoInfo.title"
+        :author="videoInfo.author"
+        :thumbnail="videoInfo.thumbnail"
+      />
+
+      <div>
+        <h3 class="font-bold">select quality</h3>
+        <p class="text-dimmed">some might not be available</p>
+
+        <div class="mt-4">
+          <UButton
+            color="primary"
+            variant="outline"
+            size="lg"
+            class="gap-1"
+            @click="onDownloadClick('best')"
+          >
+            download
+            <span class="font-bold">best quality</span>
+            <PhSparkle weight="bold" />
+          </UButton>
+        </div>
+        <UButtonGroup orientation="horizontal" size="lg" class="mt-2">
+          <UButton
+            v-for="quality in qualities.sort((a, b) => b - a)"
+            :key="quality"
+            color="neutral"
+            variant="outline"
+            @click="onDownloadClick(quality)"
+          >
+            <span class="font-bold">{{ quality }}p</span>
+          </UButton>
+        </UButtonGroup>
+      </div>
+    </div>
+  </UContainer>
+</template>
+
+<script setup lang="ts">
+import type { FormSubmitEvent } from '@nuxt/ui';
+import { PhArrowRight, PhSparkle } from '@phosphor-icons/vue';
+import * as z from 'zod/v4';
+import type { YouTubeVideoInfo } from '~/utils/get-video-info';
+
+const schema = z.object({
+  url: z.url({
+    hostname: validDomainsRegex,
+    error: 'must be a valid YouTube URL',
+  }),
+});
+type Schema = z.output<typeof schema>;
+
+const state = reactive<Partial<Schema>>({
+  url: '',
+});
+
+const isLoading = ref(false);
+
+const isGetDisabled = computed(
+  () => !state.url || !schema.safeParse(state).success || isLoading.value
+);
+
+const url = ref<string | null>(null);
+const videoInfo = ref<YouTubeVideoInfo | null>(null);
+
+async function onSubmit(event: FormSubmitEvent<Schema>) {
+  const { url: videoUrl } = event.data;
+  url.value = videoUrl;
+  isLoading.value = true;
+  try {
+    videoInfo.value = await getVideoInfo(videoUrl);
+  } catch {
+    url.value = null;
+    const toast = useToast();
+    toast.add({
+      title: 'something went wrong',
+      description: "couldn't fetch video info. please double-check the url",
+      color: 'error',
+    });
+  } finally {
+    isLoading.value = false;
+  }
+}
+
+const qualities = [144, 240, 360, 480, 720, 1080];
+
+const { downloadProgress, downloadStatus, downloadError, startDownload } = useYoutubeDownload();
+
+async function onDownloadClick(quality: 'best' | number) {
+  if (!url.value) {
+    return;
+  }
+
+  const id = extractVideoId(url.value);
+
+  if (!id) {
+    return;
+  }
+
+  await startDownload(id, quality);
+}
+
+watch(
+  downloadProgress,
+  (progress) => {
+    console.log('progress', progress);
+  },
+  { immediate: true }
+);
+
+watch(
+  downloadStatus,
+  (status) => {
+    console.log('status', status);
+  },
+  { immediate: true }
+);
+
+watch(
+  downloadError,
+  (error) => {
+    console.log('error', error);
+  },
+  { immediate: true }
+);
+</script>
