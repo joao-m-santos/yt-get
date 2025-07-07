@@ -1,7 +1,6 @@
 // server/api/video/[id].get.js
 import { createReadStream, statSync, existsSync } from 'fs';
 import path from 'path';
-import { lookup } from 'mime-types';
 
 export default defineEventHandler(async (event) => {
   try {
@@ -31,15 +30,7 @@ export default defineEventHandler(async (event) => {
     const fileSize = stats.size;
 
     // Get MIME type
-    const mimeType = lookup(filePath) || 'application/octet-stream';
-
-    // Check if it's a video file
-    if (!mimeType.startsWith('video/')) {
-      throw createError({
-        statusCode: 400,
-        statusMessage: 'file is not a video',
-      });
-    }
+    const mimeType = 'video/webm';
 
     // Handle range requests for video streaming
     const range = getHeader(event, 'range');
@@ -75,10 +66,6 @@ export default defineEventHandler(async (event) => {
     }
   } catch (error) {
     console.error('Error serving video:', error);
-
-    if (error.statusCode) {
-      throw error;
-    }
 
     throw createError({
       statusCode: 500,
