@@ -35,7 +35,6 @@
 
       <div>
         <h3 class="font-bold">select quality</h3>
-        <p class="text-dimmed">some might not be available</p>
 
         <div class="mt-4">
           <UButton
@@ -73,7 +72,7 @@
 
       <UButton v-if="downloadStatus === 'completed'" size="xl" @click="downloadVideo">
         get video
-        <PhVideo weight="bold" />
+        <PhDownloadSimple weight="bold" />
       </UButton>
     </div>
   </UContainer>
@@ -81,7 +80,7 @@
 
 <script setup lang="ts">
 import type { FormSubmitEvent } from '@nuxt/ui';
-import { PhArrowRight, PhSparkle, PhVideo } from '@phosphor-icons/vue';
+import { PhArrowRight, PhDownloadSimple, PhSparkle } from '@phosphor-icons/vue';
 import * as z from 'zod/v4';
 import type { YouTubeVideoInfo } from '~/utils/get-video-info';
 
@@ -125,7 +124,7 @@ async function onSubmit(event: FormSubmitEvent<Schema>) {
   }
 }
 
-const qualities = [144, 240, 360, 480, 720, 1080];
+const qualities = [240, 360, 480, 720, 1080];
 
 const { downloadProgress, downloadStatus, downloadError, downloadUrl, startDownload } =
   useYoutubeDownload();
@@ -141,10 +140,13 @@ async function onDownloadClick(quality: 'best' | number) {
     return;
   }
 
-  isLoading.value = true;
   await startDownload(id, quality);
-  isLoading.value = false;
 }
+
+watch(downloadStatus, (status) => {
+  if (['starting', 'downloading'].includes(status)) isLoading.value = true;
+  else isLoading.value = false;
+});
 
 const showProgress = computed(() => !['idle', 'error', 'completed'].includes(downloadStatus.value));
 
