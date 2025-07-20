@@ -38,6 +38,7 @@ export default defineEventHandler(async (event) => {
     '--newline',
     url,
   ]);
+  console.log('all good?');
 
   activeDownloads.set(downloadId, {
     process: downloadProcess,
@@ -48,6 +49,7 @@ export default defineEventHandler(async (event) => {
 
   downloadProcess.stdout.on('data', (data) => {
     const output = data.toString();
+    console.log('[yt-dlp]', output);
     const progressMatch = output.match(/(\d+\.?\d*)%/);
 
     if (progressMatch) {
@@ -68,6 +70,7 @@ export default defineEventHandler(async (event) => {
   });
 
   downloadProcess.on('error', (error) => {
+    console.log('error here', error)
     const download = activeDownloads.get(downloadId);
     if (download) {
       download.status = 'error';
