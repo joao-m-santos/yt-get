@@ -1,7 +1,7 @@
 export interface YouTubeVideoInfo {
-  title: string;
-  thumbnail: string;
   author: string;
+  thumbnail: string;
+  title: string;
 }
 
 interface YouTubeOEmbedResponse {
@@ -34,15 +34,16 @@ const getVideoInfo = async (url: string): Promise<YouTubeVideoInfo> => {
   const response = await fetch(oembedUrl);
 
   if (!response.ok) {
+    if (response.status === 401) throw new Error('401');
     throw new Error(`Failed to fetch video info: ${response.status} ${response.statusText}`);
   }
 
   const data: YouTubeOEmbedResponse = await response.json();
 
   return {
-    title: data.title,
-    thumbnail: data.thumbnail_url,
     author: data.author_name,
+    thumbnail: data.thumbnail_url,
+    title: data.title,
   };
 };
 
