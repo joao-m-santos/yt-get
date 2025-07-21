@@ -1,12 +1,16 @@
 import { existsSync, readdir, unlink } from 'fs';
+import { promisify } from 'util';
 import path from 'path';
+
+const readdirAsync = promisify(readdir);
+const unlinkAsync = promisify(unlink);
 
 export default defineTask({
   meta: {
     name: 'files:cleanup',
     description: 'Clean downloads directory files',
   },
-  run() {
+  async run() {
     console.log('[nitro] [task]', 'running files:cleanup');
 
     const DOWNLOADS_DIR = path.join(process.cwd(), 'downloads');
@@ -16,19 +20,15 @@ export default defineTask({
     }
 
     let count = 0;
-    readdir(DOWNLOADS_DIR, (err, files) => {
-      if (err) throw err;
-
-      for (const file of files) {
-        unlink(path.join(DOWNLOADS_DIR, file), (err) => {
-          console.log('[nitro] [task]', 'deleted', file);
-          count++;
-          if (err) throw err;
-        });
-      }
-    });
-
+    const files = await readdirAsync(DOWNLOADS_DIR);
+    await Promise.all(
+      files.map(async (file) => {
+        await unlinkAsync(path.join(DOWNLOADS_DIR, file));
+        count++;
+        console.log('[nitro] [task]', 'deleted', file);
+      })
+    );
     console.log('[nitro] [task]', `files:cleanup success: deleted ${count} files`);
-    return { result: 'success' };
+    return { result: 'success', deleted: count };
   },
 });

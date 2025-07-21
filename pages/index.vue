@@ -82,7 +82,6 @@
 import type { FormSubmitEvent } from '@nuxt/ui';
 import { PhArrowRight, PhDownloadSimple, PhSparkle } from '@phosphor-icons/vue';
 import * as z from 'zod/v4';
-import type { YouTubeVideoInfo } from '~/utils/get-video-info';
 
 const schema = z.object({
   url: z.url({
@@ -160,7 +159,7 @@ async function downloadVideo() {
   if (downloadUrl.value) {
     const link = document.createElement('a');
     link.href = downloadUrl.value;
-    link.download = `yt-get_${videoInfo.value?.title}.webm`;
+    link.download = sanitizeFilename(videoInfo.value?.title || 'video');
     document.body.appendChild(link);
     link.click();
     document.body.removeChild(link);
