@@ -22,4 +22,12 @@ export default defineNuxtConfig({
     },
   },
   css: ['~/assets/css/main.css'],
+  nitro: {
+    experimental: {
+      tasks: true,
+    },
+    scheduledTasks: {
+      '0 8 * * *': ['files:cleanup'],
+    },
+  },
 });

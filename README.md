@@ -7,7 +7,7 @@ an app for downloading YouTube videos as .webm files.
 ## to-do
 
 - [x] pm2 deployment
-- [ ] auto file cleanup
+- [x] auto file cleanup
 - [ ] password auth layer
 
 ---
