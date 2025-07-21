@@ -86,7 +86,7 @@ import type { YouTubeVideoInfo } from '~/utils/get-video-info';
 
 const schema = z.object({
   url: z.url({
-    hostname: validDomainsRegex,
+    hostname: VALID_DOMAINS_REGEX,
     error: 'must be a valid YouTube URL',
   }),
 });
@@ -111,14 +111,20 @@ async function onSubmit(event: FormSubmitEvent<Schema>) {
   isLoading.value = true;
   try {
     videoInfo.value = await getVideoInfo(videoUrl);
-  } catch {
-    url.value = null;
+  } catch (err) {
+    const is401 = (err as Error).message === '401';
     const toast = useToast();
     toast.add({
       title: 'something went wrong',
-      description: "couldn't fetch video info. please double-check the url",
-      color: 'error',
+      description: is401
+        ? "couldn't fetch video info, but download is available"
+        : "couldn't fetch video info. please double-check the url",
+      color: is401 ? 'info' : 'error',
     });
+
+    if (is401) {
+      videoInfo.value = UNKNOWN_VIDEO_INFO;
+    }
   } finally {
     isLoading.value = false;
   }

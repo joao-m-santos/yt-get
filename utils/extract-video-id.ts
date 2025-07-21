@@ -3,7 +3,7 @@ const extractVideoId = (url: string): string | null => {
     const parsedUrl = new URL(url);
     const hostname = parsedUrl.hostname.toLowerCase();
 
-    if (!validDomainsRegex.test(hostname)) {
+    if (!VALID_DOMAINS_REGEX.test(hostname)) {
       return null;
     }
 
