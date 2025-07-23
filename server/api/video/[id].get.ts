@@ -3,6 +3,9 @@ import { createReadStream, statSync, existsSync } from 'fs';
 import path from 'path';
 
 export default defineEventHandler(async (event) => {
+  // Require authentication
+  await requireUserSession(event);
+
   try {
     const { id } = getRouterParams(event);
 

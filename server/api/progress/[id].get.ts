@@ -1,6 +1,9 @@
-import activeDownloads from '~/server/activeDownloads';
+import activeDownloads from '../../activeDownloads';
 
 export default defineEventHandler(async (event) => {
+  // Require authentication
+  await requireUserSession(event);
+
   const downloadId = getRouterParam(event, 'id');
 
   if (!downloadId) {

@@ -81,15 +81,19 @@
 <script setup lang="ts">
 import type { FormSubmitEvent } from '@nuxt/ui';
 import { PhArrowRight, PhDownloadSimple, PhSparkle } from '@phosphor-icons/vue';
-import * as z from 'zod/v4';
+import { object as zodObject, type output as ZodOutput, url as zodUrl } from 'zod/v4';
 
-const schema = z.object({
-  url: z.url({
+definePageMeta({
+  middleware: ['auth'],
+});
+
+const schema = zodObject({
+  url: zodUrl({
     hostname: VALID_DOMAINS_REGEX,
     error: 'must be a valid YouTube URL',
   }),
 });
-type Schema = z.output<typeof schema>;
+type Schema = ZodOutput<typeof schema>;
 
 const state = reactive<Partial<Schema>>({
   url: '',

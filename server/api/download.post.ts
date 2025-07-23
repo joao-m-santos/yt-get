@@ -1,7 +1,7 @@
 import { existsSync, mkdirSync } from 'fs';
 import path from 'path';
 import { spawn } from 'child_process';
-import activeDownloads from '~/server/activeDownloads';
+import activeDownloads from '../activeDownloads';
 
 // Ensure downloads directory exists
 const DOWNLOADS_DIR = path.join(process.cwd(), 'downloads');
@@ -13,6 +13,9 @@ if (!existsSync(DOWNLOADS_DIR)) {
 const getUrl = (id: string) => `https://www.youtube.com/watch?v=${id}`;
 
 export default defineEventHandler(async (event) => {
+  // Require authentication
+  await requireUserSession(event);
+
   const { id, quality = 'best' } = await readBody(event);
 
   if (!id) {
@@ -70,7 +73,7 @@ export default defineEventHandler(async (event) => {
   });
 
   downloadProcess.on('error', (error) => {
-    console.log('error here', error)
+    console.log('error here', error);
     const download = activeDownloads.get(downloadId);
     if (download) {
       download.status = 'error';
