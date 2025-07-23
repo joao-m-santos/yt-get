@@ -8,7 +8,8 @@
     "start": "bun run .output/server/index.mjs",
     "generate": "nuxt generate",
     "preview": "nuxt preview",
-    "postinstall": "nuxt prepare"
+    "postinstall": "nuxt prepare",
+    "redeploy": "bun run build && pm2 restart yt-get"
   },
   "dependencies": {
     "@nuxt/eslint": "1.5.2",
