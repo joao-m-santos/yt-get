@@ -56,6 +56,7 @@ async function login() {
       title: 'welcome!',
       color: 'success',
     });
+    console.log('success!');
     await refreshSession();
     await navigateTo('/');
   } catch (error) {
