@@ -3,6 +3,18 @@ export default defineNuxtConfig({
   compatibilityDate: '2025-05-15',
   devtools: { enabled: true },
   modules: ['@nuxt/eslint', '@nuxt/ui', 'nuxt-auth-utils'],
+  runtimeConfig: {
+    session: {
+      name: 'yt-get_session',
+      password: process.env.NUXT_SESSION_PASSWORD || '',
+      maxAge: 60 * 60 * 24 * 7, // 1 week
+      cookie: {
+        httpOnly: true,
+        sameSite: 'lax',
+        secure: false,
+      },
+    },
+  },
   app: {
     head: {
       title: 'yt-get',
