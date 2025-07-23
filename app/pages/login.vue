@@ -46,17 +46,19 @@ const toast = useToast();
 
 async function login() {
   try {
-    await $fetch('/api/login', {
+    const { session } = await $fetch('/api/login', {
       method: 'POST',
       body: state,
     });
+
+    console.log('[session]', session);
 
     // Refresh the session on client-side and redirect to the home page
     toast.add({
       title: 'welcome!',
       color: 'success',
     });
-    console.log('success!');
+
     await refreshSession();
     await navigateTo('/');
   } catch (error) {

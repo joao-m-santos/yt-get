@@ -5,11 +5,12 @@ export default defineEventHandler(async (event) => {
 
   if (password === process.env.PASSWORD) {
     // set the user session in the cookie
-    console.log('login success');
-    await setUserSession(event, {
-      user: {},
+    const session = await setUserSession(event, {
+      user: {
+        name: 'default',
+      },
     });
-    return {};
+    return { session };
   }
   throw createError({
     statusCode: 401,
