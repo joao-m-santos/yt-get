@@ -41,7 +41,7 @@ export default defineEventHandler(async (event) => {
     '--newline',
     url,
   ]);
-  console.log('all good?');
+  console.log('downloadId', downloadId);
 
   activeDownloads.set(downloadId, {
     process: downloadProcess,

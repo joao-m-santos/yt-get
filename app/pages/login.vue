@@ -51,8 +51,6 @@ async function login() {
       body: state,
     });
 
-    console.log('[session]', session);
-
     // Refresh the session on client-side and redirect to the home page
     toast.add({
       title: 'welcome!',
